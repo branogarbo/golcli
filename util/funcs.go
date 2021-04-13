@@ -2,8 +2,8 @@ package util
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gosuri/uilive"
@@ -36,7 +36,7 @@ func GetFrameCellsByPattern(frameConfig FrameConfig, pattern Pattern) FrameCells
 		strY            int
 	)
 
-	fileBytes, err := ioutil.ReadFile(pattern.Path)
+	fileBytes, err := os.ReadFile(pattern.Path)
 	if err != nil {
 		log.Fatal("ConvPatternToFrameCells: could not open pattern file")
 	}

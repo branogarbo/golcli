@@ -40,32 +40,45 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "golcli",
 	Short: "A simple implementation of Conway's Game of Life ",
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+
+		if len(args) == 0 {
+			patternPath = "./pattern.txt"
+		} else {
+			patternPath = args[0]
+		}
 
 		frameWidth, err = cmd.Flags().GetInt("width")
 		frameHeight, err = cmd.Flags().GetInt("height")
 		frameCount, err = cmd.Flags().GetInt("count")
+		frameInterval, err = cmd.Flags().GetInt("interval")
+		livingCellChar, err = cmd.Flags().GetString("live-char")
+		deadCellChar, err = cmd.Flags().GetString("dead-char")
+
+		// patternPath, err = cmd.Flags().GetString("pattern-file")
+		patternX, err = cmd.Flags().GetInt("pattern-x")
+		patternY, err = cmd.Flags().GetInt("pattern-y")
 
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		var (
-			frameConfig = u.FrameConfig{
-				Width:          frameWidth,
-				Height:         frameHeight,
-				FrameCount:     frameCount,
-				Interval:       time.Duration(frameInterval) * time.Millisecond,
-				LivingCellChar: livingCellChar,
-				DeadCellChar:   deadCellChar,
-			}
-			initPattern = u.Pattern{
-				Path: patternPath,
-				X:    patternX,
-				Y:    patternY,
-			}
-		)
+		frameConfig := u.FrameConfig{
+			Width:          frameWidth,
+			Height:         frameHeight,
+			FrameCount:     frameCount,
+			Interval:       time.Duration(frameInterval) * time.Millisecond,
+			LivingCellChar: livingCellChar,
+			DeadCellChar:   deadCellChar,
+		}
+
+		initPattern := u.Pattern{
+			Path: patternPath,
+			X:    patternX,
+			Y:    patternY,
+		}
 
 		u.RunGame(frameConfig, initPattern)
 	},
@@ -76,15 +89,14 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().IntVarP(&frameWidth, "width", "w", 70, "The width of the viewing frame.")
-	rootCmd.Flags().IntVarP(&frameHeight, "height", "h", 50, "The height of the viewing frame.")
-	rootCmd.Flags().IntVarP(&frameCount, "count", "c", 999999999, "The height of the viewing frame.")
+	rootCmd.Flags().IntVarP(&frameWidth, "width", "W", 70, "The width of the viewing frame.")
+	rootCmd.Flags().IntVarP(&frameHeight, "height", "H", 50, "The height of the viewing frame.")
+	rootCmd.Flags().IntVarP(&frameCount, "count", "c", 999999999, "The number of frames displayed before exiting.")
 	rootCmd.Flags().IntVarP(&frameInterval, "interval", "i", 10, "The number of milliseconds between frames.")
-	rootCmd.Flags().IntVarP(&frameInterval, "interval", "i", 10, "The number of milliseconds between frames.")
-	rootCmd.Flags().StringVarP(&livingCellChar, "live-char", "lc", "██", "The character(s) that represent a live cell.")
-	rootCmd.Flags().StringVarP(&livingCellChar, "dead-char", "dc", "  ", "The character(s) that represent a live cell.")
+	rootCmd.Flags().StringVarP(&livingCellChar, "live-char", "l", "██", "The character(s) that represent a live cell.")
+	rootCmd.Flags().StringVarP(&deadCellChar, "dead-char", "d", "  ", "The character(s) that represent a live cell.")
 
-	rootCmd.Flags().StringVarP(&patternPath, "pattern-file", "-p", "./pattern.txt", `The initial pattern of live and dead cells, use "#" to represent live cells.`)
-	rootCmd.Flags().IntVarP(&patternX, "pattern-x", "-px", 24, `The initial x offset of the pattern defined with --pattern-file.`)
-	rootCmd.Flags().IntVarP(&patternY, "pattern-y", "-py", 18, `The initial y offset of the pattern defined with --pattern-file.`)
+	// rootCmd.Flags().StringVarP(&patternPath, "pattern-file", "p", "./pattern.txt", `The initial pattern of live and dead cells, use "#" to represent live cells.`)
+	rootCmd.Flags().IntVarP(&patternX, "pattern-x", "x", 24, "The initial x offset of the pattern defined with --pattern-file.")
+	rootCmd.Flags().IntVarP(&patternY, "pattern-y", "y", 18, "The initial y offset of the pattern defined with --pattern-file.")
 }
