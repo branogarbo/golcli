@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/gosuri/uilive"
 )
 
@@ -20,13 +18,13 @@ func main() {
 	writer = uilive.New()
 	writer.Start()
 
-	for i := 0; i < 5; i++ {
-		ClearAndSpawnCells(writer, frameConfig, frameCells)
+	ClearAndSpawnCells(writer, frameConfig, frameCells)
+	// for i := 0; i < 5; i++ {
 
-		UpdateCells(frameConfig, &frameCells)
+	// 	frameCells = UpdateCells(frameConfig, frameCells)
 
-		time.Sleep(500 * time.Millisecond)
-	}
+	// 	time.Sleep(500 * time.Millisecond)
+	// }
 
 	writer.Stop()
 }

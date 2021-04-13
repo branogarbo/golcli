@@ -18,7 +18,7 @@ func ClearAndSpawnCells(writer *uilive.Writer, frameConfig FrameConfig, frameCel
 			cell := frameCells[cellNum]
 
 			if cell.IsAlive {
-				outputString += "#" //█
+				outputString += fmt.Sprint(len(cell.LivingNeighbors)) //█
 			} else {
 				outputString += "-"
 			}
@@ -32,20 +32,30 @@ func ClearAndSpawnCells(writer *uilive.Writer, frameConfig FrameConfig, frameCel
 }
 
 func GenerateFrameCellsFromLivingCells(frameConfig FrameConfig, initLivingCells InitLivingCells) FrameCells {
-	var frameCells FrameCells
+	var (
+		frameCells FrameCells
+		isAlive    bool
+	)
 
-	for x := 0; x < frameConfig.Width; x++ {
-		for y := 0; y < frameConfig.Height; y++ {
-			cell := Cell{x, y, false}
+	for y := 0; y < frameConfig.Height; y++ {
+		for x := 0; x < frameConfig.Width; x++ {
 
+			for _, coord := range initLivingCells {
+				isAlive = x == coord[0] && y == coord[1]
+
+				if isAlive {
+					break
+				}
+			}
+
+			cell := Cell{
+				X:               x,
+				Y:               y,
+				IsAlive:         isAlive,
+				LivingNeighbors: GetLivingNeighborsByCoord(frameConfig, frameCells, x, y),
+			}
 			frameCells = append(frameCells, cell)
 		}
-	}
-
-	for _, coord := range initLivingCells {
-		targetCell := frameCells.GetCellByCoord(frameConfig, coord[0], coord[1])
-
-		targetCell.IsAlive = true
 	}
 
 	return frameCells
@@ -58,22 +68,15 @@ func GenerateFrameCellsFromLivingCells(frameConfig FrameConfig, initLivingCells 
 
 // These rules, which compare the behavior of the automaton to real life, can be condensed into the following:
 
-func UpdateCells(frameConfig FrameConfig, frameCells *FrameCells) {
-	for _, cell := range *frameCells {
-		if frameConfig.IsCoordOutOfFrame(cell.X, cell.Y) {
+func UpdateCells(frameConfig FrameConfig, frameCells FrameCells) FrameCells {
+	var newFrameCells FrameCells
+
+	for _, cell := range frameCells {
+		if IsCoordOutOfFrame(frameConfig, cell.X, cell.Y) {
 			log.Fatal("SetCellIsAlive: coord is out of frame")
 		}
 
-		var (
-			cellNeighbors   = frameCells.GetNeighborsByCoord(frameConfig, cell.X, cell.Y)
-			livingNeighbors CellNeighbors
-		)
-
-		for _, neighborCell := range cellNeighbors {
-			if neighborCell.IsAlive {
-				livingNeighbors = append(livingNeighbors, neighborCell)
-			}
-		}
+		livingNeighbors := GetLivingNeighborsByCoord(frameConfig, frameCells, cell.X, cell.Y)
 
 		// Any live cell with two or three live neighbours survives.
 		// Any dead cell with three live neighbours becomes a live cell.
@@ -87,13 +90,17 @@ func UpdateCells(frameConfig FrameConfig, frameCells *FrameCells) {
 		} else {
 			cell.IsAlive = false
 		}
+
+		newFrameCells = append(newFrameCells, cell)
 	}
+
+	return newFrameCells
 }
 
-func (frameCells FrameCells) GetCellByCoord(frameConfig FrameConfig, x, y int) Cell {
+func GetCellByCoord(frameConfig FrameConfig, frameCells FrameCells, x, y int) Cell {
 	var targetCell Cell
 
-	if frameConfig.IsCoordOutOfFrame(x, y) {
+	if IsCoordOutOfFrame(frameConfig, x, y) {
 		log.Fatal("GetCellByCoord: coord is out of frame")
 	}
 
@@ -107,12 +114,12 @@ func (frameCells FrameCells) GetCellByCoord(frameConfig FrameConfig, x, y int) C
 	return targetCell
 }
 
-func (frameCells FrameCells) GetNeighborsByCoord(frameConfig FrameConfig, x, y int) CellNeighbors {
-	if frameConfig.IsCoordOutOfFrame(x, y) {
-		log.Fatal("GetNeighborsByCoord: coord is out of frame")
+func GetLivingNeighborsByCoord(frameConfig FrameConfig, frameCells FrameCells, x, y int) CellNeighbors {
+	if IsCoordOutOfFrame(frameConfig, x, y) {
+		log.Fatal("GetLivingNeighborsByCoord: coord is out of frame")
 	}
 
-	var cellNeighbors CellNeighbors
+	var cellLivingNeighbors CellNeighbors
 
 	for relX := -1; relX < 1; relX++ {
 		for relY := -1; relY < 1; relY++ {
@@ -121,15 +128,19 @@ func (frameCells FrameCells) GetNeighborsByCoord(frameConfig FrameConfig, x, y i
 				targetY = y + relY
 			)
 
-			if !(relX == 0 && relY == 0) && !frameConfig.IsCoordOutOfFrame(targetX, targetY) {
-				cellNeighbors = append(cellNeighbors, frameCells.GetCellByCoord(frameConfig, targetX, targetY))
+			if !(relX == 0 && relY == 0) && !IsCoordOutOfFrame(frameConfig, targetX, targetY) {
+				cell := GetCellByCoord(frameConfig, frameCells, targetX, targetY)
+
+				if cell.IsAlive {
+					cellLivingNeighbors = append(cellLivingNeighbors, cell)
+				}
 			}
 		}
 	}
 
-	return cellNeighbors
+	return cellLivingNeighbors
 }
 
-func (frameConfig FrameConfig) IsCoordOutOfFrame(x, y int) bool {
+func IsCoordOutOfFrame(frameConfig FrameConfig, x, y int) bool {
 	return x < 0 || y < 0 || x > frameConfig.Width || y > frameConfig.Height
 }

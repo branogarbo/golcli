@@ -13,7 +13,8 @@ type FrameConfig struct {
 }
 
 type Cell struct {
-	X       int
-	Y       int
-	IsAlive bool
+	X               int
+	Y               int
+	IsAlive         bool
+	LivingNeighbors CellNeighbors
 }
