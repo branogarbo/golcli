@@ -1,5 +1,5 @@
 /*
-Copyright © 2021 Brian Longmore brianl.ext@gmail.com
+Copyright © 2021 NAME HERE <EMAIL ADDRESS>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,10 +13,32 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package util
 
-import "github.com/branogarbo/golcli/cmd"
+import "time"
 
-func main() {
-	cmd.Execute()
+type FrameCells []Cell
+
+type CellNeighbors []Cell
+
+type Pattern struct {
+	Path string
+	X    int
+	Y    int
+}
+
+type FrameConfig struct {
+	Width          int
+	Height         int
+	FrameCount     int
+	Interval       time.Duration
+	DeadCellChar   string
+	LivingCellChar string
+}
+
+type Cell struct {
+	X               int
+	Y               int
+	IsAlive         bool
+	LivingNeighbors CellNeighbors
 }
