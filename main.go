@@ -1,30 +1,25 @@
 package main
 
 import (
-	"github.com/gosuri/uilive"
+	"time"
 )
 
 func main() {
 	var (
-		writer      *uilive.Writer
 		frameConfig = FrameConfig{
-			Width:  100,
-			Height: 40,
+			Width:          70,
+			Height:         50,
+			FrameCount:     99999999,
+			Interval:       10 * time.Millisecond,
+			LivingCellChar: "██",
+			DeadCellChar:   "  ",
 		}
-		initLivingCells = InitLivingCells{{20, 20}, {21, 21}, {20, 21}}
-		frameCells      = GenerateFrameCellsFromLivingCells(frameConfig, initLivingCells)
+		initPattern = Pattern{
+			Path: "./initPatterns/spaceshipCrash.txt",
+			X:    24,
+			Y:    18,
+		}
 	)
 
-	writer = uilive.New()
-	writer.Start()
-
-	ClearAndSpawnCells(writer, frameConfig, frameCells)
-	// for i := 0; i < 5; i++ {
-
-	// 	frameCells = UpdateCells(frameConfig, frameCells)
-
-	// 	time.Sleep(500 * time.Millisecond)
-	// }
-
-	writer.Stop()
+	RunGame(frameConfig, initPattern)
 }

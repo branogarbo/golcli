@@ -2,40 +2,58 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"time"
 
 	"github.com/gosuri/uilive"
 )
 
-func ClearAndSpawnCells(writer *uilive.Writer, frameConfig FrameConfig, frameCells FrameCells) {
+func RunGame(frameConfig FrameConfig, initPattern Pattern) {
 	var (
-		cellNum      int
-		outputString string
+		writer     *uilive.Writer
+		frameCells = GetFrameCellsByPattern(frameConfig, initPattern)
 	)
 
-	for row := 0; row < frameConfig.Height; row++ {
-		for col := 0; col < frameConfig.Width; col++ {
-			cell := frameCells[cellNum]
+	writer = uilive.New()
+	writer.Start()
 
-			if cell.IsAlive {
-				outputString += fmt.Sprint(len(cell.LivingNeighbors)) //█
-			} else {
-				outputString += "-"
-			}
+	for i := 0; i < frameConfig.FrameCount; i++ {
+		ClearAndSpawnCells(writer, frameConfig, frameCells)
 
-			cellNum++
-		}
-		outputString += "\n"
+		frameCells = UpdateCells(frameConfig, frameCells)
+
+		time.Sleep(frameConfig.Interval)
 	}
-
-	fmt.Fprint(writer, outputString)
 }
 
-func GenerateFrameCellsFromLivingCells(frameConfig FrameConfig, initLivingCells InitLivingCells) FrameCells {
+func GetFrameCellsByPattern(frameConfig FrameConfig, pattern Pattern) FrameCells {
 	var (
-		frameCells FrameCells
-		isAlive    bool
+		frameCells      FrameCells
+		initLivingCells [][2]int
+		isAlive         bool
+		strX            int
+		strY            int
 	)
+
+	fileBytes, err := ioutil.ReadFile(pattern.Path)
+	if err != nil {
+		log.Fatal("ConvPatternToFrameCells: could not open pattern file")
+	}
+
+	for _, c := range fileBytes {
+		char := string(c)
+
+		strX++
+
+		if char == "#" {
+			initLivingCells = append(initLivingCells, [2]int{strX + pattern.X, strY + pattern.Y})
+		} else if char == "\n" {
+			strX = 0
+			strY++
+		}
+
+	}
 
 	for y := 0; y < frameConfig.Height; y++ {
 		for x := 0; x < frameConfig.Width; x++ {
@@ -49,16 +67,44 @@ func GenerateFrameCellsFromLivingCells(frameConfig FrameConfig, initLivingCells 
 			}
 
 			cell := Cell{
-				X:               x,
-				Y:               y,
-				IsAlive:         isAlive,
-				LivingNeighbors: GetLivingNeighborsByCoord(frameConfig, frameCells, x, y),
+				X:       x,
+				Y:       y,
+				IsAlive: isAlive,
 			}
+
 			frameCells = append(frameCells, cell)
 		}
 	}
 
+	for i := range frameCells {
+		frameCells[i].LivingNeighbors = GetLivingNeighborsByCoord(frameConfig, frameCells, frameCells[i].X, frameCells[i].Y)
+	}
+
 	return frameCells
+}
+
+func ClearAndSpawnCells(writer *uilive.Writer, frameConfig FrameConfig, frameCells FrameCells) {
+	var (
+		cellNum      int
+		outputString string
+	)
+
+	for row := 0; row < frameConfig.Height; row++ {
+		for col := 0; col < frameConfig.Width; col++ {
+			cell := frameCells[cellNum]
+
+			if cell.IsAlive {
+				outputString += frameConfig.LivingCellChar
+			} else {
+				outputString += frameConfig.DeadCellChar
+			}
+
+			cellNum++
+		}
+		outputString += "\n"
+	}
+
+	fmt.Fprint(writer, outputString)
 }
 
 // Any live cell with fewer than two live neighbours dies, as if by underpopulation.
@@ -94,6 +140,10 @@ func UpdateCells(frameConfig FrameConfig, frameCells FrameCells) FrameCells {
 		newFrameCells = append(newFrameCells, cell)
 	}
 
+	for i := range newFrameCells {
+		newFrameCells[i].LivingNeighbors = GetLivingNeighborsByCoord(frameConfig, newFrameCells, newFrameCells[i].X, newFrameCells[i].Y)
+	}
+
 	return newFrameCells
 }
 
@@ -121,8 +171,8 @@ func GetLivingNeighborsByCoord(frameConfig FrameConfig, frameCells FrameCells, x
 
 	var cellLivingNeighbors CellNeighbors
 
-	for relX := -1; relX < 1; relX++ {
-		for relY := -1; relY < 1; relY++ {
+	for relX := -1; relX <= 1; relX++ {
+		for relY := -1; relY <= 1; relY++ {
 			var (
 				targetX = x + relX
 				targetY = y + relY
