@@ -1,5 +1,5 @@
 /*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
+Copyright © 2021 Brian Longmore brianl.ext@gmail.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "golcli",
-	Short: "A simple implementation of Conway's Game of Life ",
+	Short: "A simple CLI implementation of Conway's Game of Life.",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -56,7 +56,6 @@ var rootCmd = &cobra.Command{
 		livingCellChar, err = cmd.Flags().GetString("live-char")
 		deadCellChar, err = cmd.Flags().GetString("dead-char")
 
-		// patternPath, err = cmd.Flags().GetString("pattern-file")
 		patternX, err = cmd.Flags().GetInt("pattern-x")
 		patternY, err = cmd.Flags().GetInt("pattern-y")
 
@@ -89,14 +88,13 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().IntVarP(&frameWidth, "width", "W", 70, "The width of the viewing frame.")
-	rootCmd.Flags().IntVarP(&frameHeight, "height", "H", 50, "The height of the viewing frame.")
+	rootCmd.Flags().IntVarP(&frameWidth, "width", "W", 40, "The width of the viewing frame.")
+	rootCmd.Flags().IntVarP(&frameHeight, "height", "H", 30, "The height of the viewing frame.")
 	rootCmd.Flags().IntVarP(&frameCount, "count", "c", 999999999, "The number of frames displayed before exiting.")
-	rootCmd.Flags().IntVarP(&frameInterval, "interval", "i", 10, "The number of milliseconds between frames.")
+	rootCmd.Flags().IntVarP(&frameInterval, "interval", "i", 50, "The number of milliseconds between frames.")
 	rootCmd.Flags().StringVarP(&livingCellChar, "live-char", "l", "██", "The character(s) that represent a live cell.")
 	rootCmd.Flags().StringVarP(&deadCellChar, "dead-char", "d", "  ", "The character(s) that represent a live cell.")
 
-	// rootCmd.Flags().StringVarP(&patternPath, "pattern-file", "p", "./pattern.txt", `The initial pattern of live and dead cells, use "#" to represent live cells.`)
-	rootCmd.Flags().IntVarP(&patternX, "pattern-x", "x", 24, "The initial x offset of the pattern defined with --pattern-file.")
-	rootCmd.Flags().IntVarP(&patternY, "pattern-y", "y", 18, "The initial y offset of the pattern defined with --pattern-file.")
+	rootCmd.Flags().IntVarP(&patternX, "pattern-x", "x", 12, "The initial x offset of the pattern defined with --pattern-file.")
+	rootCmd.Flags().IntVarP(&patternY, "pattern-y", "y", 8, "The initial y offset of the pattern defined with --pattern-file.")
 }
