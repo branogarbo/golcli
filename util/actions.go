@@ -11,14 +11,20 @@ import (
 // RunGame runs the game based on the passed args.
 func RunGame(gameConfig GameConfig, initPattern Pattern) {
 	var (
-		writer     *uilive.Writer
-		frameCells = GetFrameCellsByPattern(gameConfig, initPattern)
+		writer       *uilive.Writer
+		iValComparer = gameConfig.FrameCount
+		frameCells   = GetFrameCellsByPattern(gameConfig, initPattern)
 	)
 
 	writer = uilive.New()
 	writer.Start()
 
-	for i := 0; i < gameConfig.FrameCount; i++ {
+	if gameConfig.FrameCount == -1 {
+		iValComparer = 9223372036854775807
+	}
+	fmt.Println(iValComparer)
+
+	for i := 0; i < iValComparer; i++ {
 		ClearAndSpawnCells(writer, gameConfig, frameCells)
 
 		frameCells = UpdateCells(gameConfig, frameCells)

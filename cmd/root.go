@@ -38,9 +38,10 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "golcli",
-	Short: "A simple CLI implementation of Conway's Game of Life.",
-	Args:  cobra.MaximumNArgs(1),
+	Use:     "golcli",
+	Short:   "A basic CLI implementation of Conway's Game of Life.",
+	Args:    cobra.MaximumNArgs(1),
+	Example: `golcli -c 500 -l "##" -d "--" ./pattern.txt`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if len(args) == 0 {
@@ -55,7 +56,6 @@ var rootCmd = &cobra.Command{
 		frameInterval, err = cmd.Flags().GetInt("interval")
 		livingCellChar, err = cmd.Flags().GetString("live-char")
 		deadCellChar, err = cmd.Flags().GetString("dead-char")
-
 		patternX, err = cmd.Flags().GetInt("pattern-x")
 		patternY, err = cmd.Flags().GetInt("pattern-y")
 
@@ -88,13 +88,12 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().IntVarP(&frameWidth, "width", "W", 40, "The width of the frames.")
-	rootCmd.Flags().IntVarP(&frameHeight, "height", "H", 30, "The height of the frames.")
-	rootCmd.Flags().IntVarP(&frameCount, "count", "c", 999999999, "The number of frames displayed before exiting.")
-	rootCmd.Flags().IntVarP(&frameInterval, "interval", "i", 50, "The number of milliseconds between frames.")
-	rootCmd.Flags().StringVarP(&livingCellChar, "live-char", "l", "██", "The character(s) that represent a live cell.")
-	rootCmd.Flags().StringVarP(&deadCellChar, "dead-char", "d", "  ", "The character(s) that represent a live cell.")
-
-	rootCmd.Flags().IntVarP(&patternX, "pattern-x", "x", 12, "The initial x offset of the pattern defined with --pattern-file.")
-	rootCmd.Flags().IntVarP(&patternY, "pattern-y", "y", 8, "The initial y offset of the pattern defined with --pattern-file.")
+	rootCmd.Flags().IntVarP(&frameWidth, "width", "W", 40, "The width of the frames")
+	rootCmd.Flags().IntVarP(&frameHeight, "height", "H", 30, "The height of the frames")
+	rootCmd.Flags().IntVarP(&frameCount, "count", "c", -1, "The number of frames displayed before exiting (-1 : infinite loop)")
+	rootCmd.Flags().IntVarP(&frameInterval, "interval", "i", 50, "The number of milliseconds between frames")
+	rootCmd.Flags().StringVarP(&livingCellChar, "live-char", "l", "██", "The character(s) that represent a live cell")
+	rootCmd.Flags().StringVarP(&deadCellChar, "dead-char", "d", "  ", "The character(s) that represent a live cell")
+	rootCmd.Flags().IntVarP(&patternX, "pattern-x", "x", 12, "The initial x offset of the initial pattern")
+	rootCmd.Flags().IntVarP(&patternY, "pattern-y", "y", 8, "The initial y offset of the initial pattern")
 }
