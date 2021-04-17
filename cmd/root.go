@@ -64,7 +64,7 @@ var rootCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		frameConfig := u.FrameConfig{
+		gameConfig := u.GameConfig{
 			Width:          frameWidth,
 			Height:         frameHeight,
 			FrameCount:     frameCount,
@@ -79,7 +79,7 @@ var rootCmd = &cobra.Command{
 			Y:    patternY,
 		}
 
-		u.RunGame(frameConfig, initPattern)
+		u.RunGame(gameConfig, initPattern)
 	},
 }
 
@@ -88,8 +88,8 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().IntVarP(&frameWidth, "width", "W", 40, "The width of the viewing frame.")
-	rootCmd.Flags().IntVarP(&frameHeight, "height", "H", 30, "The height of the viewing frame.")
+	rootCmd.Flags().IntVarP(&frameWidth, "width", "W", 40, "The width of the frames.")
+	rootCmd.Flags().IntVarP(&frameHeight, "height", "H", 30, "The height of the frames.")
 	rootCmd.Flags().IntVarP(&frameCount, "count", "c", 999999999, "The number of frames displayed before exiting.")
 	rootCmd.Flags().IntVarP(&frameInterval, "interval", "i", 50, "The number of milliseconds between frames.")
 	rootCmd.Flags().StringVarP(&livingCellChar, "live-char", "l", "██", "The character(s) that represent a live cell.")

@@ -27,7 +27,7 @@ type Pattern struct {
 	Y    int
 }
 
-type FrameConfig struct {
+type GameConfig struct {
 	Width          int
 	Height         int
 	FrameCount     int
