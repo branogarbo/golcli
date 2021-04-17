@@ -94,6 +94,6 @@ func init() {
 	rootCmd.Flags().IntVarP(&frameInterval, "interval", "i", 50, "The number of milliseconds between frames")
 	rootCmd.Flags().StringVarP(&livingCellChar, "live-char", "l", "██", "The character(s) that represent a live cell")
 	rootCmd.Flags().StringVarP(&deadCellChar, "dead-char", "d", "  ", "The character(s) that represent a live cell")
-	rootCmd.Flags().IntVarP(&patternX, "pattern-x", "x", 12, "The initial x offset of the initial pattern")
-	rootCmd.Flags().IntVarP(&patternY, "pattern-y", "y", 8, "The initial y offset of the initial pattern")
+	rootCmd.Flags().IntVarP(&patternX, "pattern-x", "x", 12, "The x offset of the initial pattern")
+	rootCmd.Flags().IntVarP(&patternY, "pattern-y", "y", 8, "The y offset of the initial pattern")
 }

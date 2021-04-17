@@ -35,7 +35,7 @@ Flags:
   -h, --help               help for golcli
   -i, --interval int       The number of milliseconds between frames (default 50)
   -l, --live-char string   The character(s) that represent a live cell (default "██")
-  -x, --pattern-x int      The initial x offset of the initial pattern (default 12)
-  -y, --pattern-y int      The initial y offset of the initial pattern (default 8)
+  -x, --pattern-x int      The x offset of the initial pattern (default 12)
+  -y, --pattern-y int      The y offset of the initial pattern (default 8)
   -W, --width int          The width of the frames (default 40)
 ```
