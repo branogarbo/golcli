@@ -22,7 +22,6 @@ func RunGame(gameConfig GameConfig, initPattern Pattern) {
 	if gameConfig.FrameCount == -1 {
 		iValComparer = 9223372036854775807
 	}
-	fmt.Println(iValComparer)
 
 	for i := 0; i < iValComparer; i++ {
 		ClearAndSpawnCells(writer, gameConfig, frameCells)
