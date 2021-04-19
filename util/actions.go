@@ -1,30 +1,27 @@
 package util
 
 import (
-	"fmt"
-	"log"
+	"os"
 	"time"
 
-	"github.com/gosuri/uilive"
+	gt "github.com/buger/goterm"
 )
 
 // RunGame runs the game based on the passed args.
 func RunGame(gameConfig GameConfig, initPattern Pattern) {
 	var (
-		writer       *uilive.Writer
 		iValComparer = gameConfig.FrameCount
 		frameCells   = GetFrameCellsByPattern(gameConfig, initPattern)
 	)
-
-	writer = uilive.New()
-	writer.Start()
 
 	if gameConfig.FrameCount == -1 {
 		iValComparer = 9223372036854775807
 	}
 
+	gt.Clear()
+
 	for i := 0; i < iValComparer; i++ {
-		ClearAndSpawnCells(writer, gameConfig, frameCells)
+		ClearAndSpawnCells(gameConfig, frameCells)
 
 		frameCells = UpdateCells(gameConfig, frameCells)
 
@@ -33,10 +30,11 @@ func RunGame(gameConfig GameConfig, initPattern Pattern) {
 }
 
 // ClearAndSpawnCells updates the cell string that is printed to the command line.
-func ClearAndSpawnCells(writer *uilive.Writer, gameConfig GameConfig, frameCells FrameCells) {
+func ClearAndSpawnCells(gameConfig GameConfig, frameCells FrameCells) {
 	var (
 		cellNum      int
 		outputString string
+		argString    string
 	)
 
 	for row := 0; row < gameConfig.Height; row++ {
@@ -54,41 +52,29 @@ func ClearAndSpawnCells(writer *uilive.Writer, gameConfig GameConfig, frameCells
 		outputString += "\n"
 	}
 
-	fmt.Fprint(writer, outputString)
+	for _, arg := range os.Args {
+		argString += arg + " "
+	}
+
+	gt.MoveCursor(1, 1)
+
+	gt.Println(gt.Color(argString, gt.YELLOW))
+	gt.Print(outputString)
+
+	gt.Flush()
 }
 
 // UpdateCells returns new frame cells after evaluating the living state of frameCells.
 func UpdateCells(gameConfig GameConfig, frameCells FrameCells) FrameCells {
-	var newFrameCells FrameCells
+	var (
+		newFrameCells FrameCells
+		newCell       Cell
+	)
 
 	for _, cell := range frameCells {
-		if IsCoordOutOfFrame(gameConfig, cell.X, cell.Y) {
-			log.Fatal("SetCellIsAlive: coord is out of frame")
-		}
+		newCell = GetNewCell(gameConfig, frameCells, cell)
 
-		livingNeighbors := GetLivingNeighborsByCoord(gameConfig, frameCells, cell.X, cell.Y)
-
-		// Any live cell with fewer than two live neighbours dies, as if by underpopulation.
-		// Any live cell with two or three live neighbours lives on to the next generation.
-		// Any live cell with more than three live neighbours dies, as if by overpopulation.
-		// Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
-
-		// These rules, which compare the behavior of the automaton to real life, can be condensed into the following:
-
-		// Any live cell with two or three live neighbours survives.
-		// Any dead cell with three live neighbours becomes a live cell.
-		// All other live cells die in the next generation. Similarly, all other dead cells stay dead.
-
-		// i know this part can be more concise but this is for readability
-		if cell.IsAlive && (len(livingNeighbors) == 2 || len(livingNeighbors) == 3) {
-			cell.IsAlive = true
-		} else if !cell.IsAlive && len(livingNeighbors) == 3 {
-			cell.IsAlive = true
-		} else {
-			cell.IsAlive = false
-		}
-
-		newFrameCells = append(newFrameCells, cell)
+		newFrameCells = append(newFrameCells, newCell)
 	}
 
 	for i := range newFrameCells {

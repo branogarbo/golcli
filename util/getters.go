@@ -23,15 +23,14 @@ func GetFrameCellsByPattern(gameConfig GameConfig, pattern Pattern) FrameCells {
 	for _, c := range fileBytes {
 		char := string(c)
 
-		strX++
-
 		if char == "#" {
 			initLivingCells = append(initLivingCells, [2]int{strX + pattern.X, strY + pattern.Y})
 		} else if char == "\n" {
-			strX = 0
+			strX = -1
 			strY++
 		}
 
+		strX++
 	}
 
 	for y := 0; y < gameConfig.Height; y++ {
@@ -111,4 +110,35 @@ func GetLivingNeighborsByCoord(gameConfig GameConfig, frameCells FrameCells, x, 
 // IsCoordOutOfFrame returns whether or not the cell at (x,y) is out of the frame.
 func IsCoordOutOfFrame(gameConfig GameConfig, x, y int) bool {
 	return x < 0 || y < 0 || x > gameConfig.Width || y > gameConfig.Height
+}
+
+// GetNewCell returns a new cell from the passed cell according to the life conditions.
+func GetNewCell(gameConfig GameConfig, frameCells FrameCells, cell Cell) Cell {
+	if IsCoordOutOfFrame(gameConfig, cell.X, cell.Y) {
+		log.Fatal("GetNewCell: coord is out of frame")
+	}
+
+	livingNeighbors := GetLivingNeighborsByCoord(gameConfig, frameCells, cell.X, cell.Y)
+
+	// Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+	// Any live cell with two or three live neighbours lives on to the next generation.
+	// Any live cell with more than three live neighbours dies, as if by overpopulation.
+	// Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+
+	// These rules, which compare the behavior of the automaton to real life, can be condensed into the following:
+
+	// Any live cell with two or three live neighbours survives.
+	// Any dead cell with three live neighbours becomes a live cell.
+	// All other live cells die in the next generation. Similarly, all other dead cells stay dead.
+
+	// i know this part can be more concise but this is for readability
+	if cell.IsAlive && (len(livingNeighbors) == 2 || len(livingNeighbors) == 3) {
+		cell.IsAlive = true
+	} else if !cell.IsAlive && len(livingNeighbors) == 3 {
+		cell.IsAlive = true
+	} else {
+		cell.IsAlive = false
+	}
+
+	return cell
 }
