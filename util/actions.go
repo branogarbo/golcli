@@ -1,8 +1,6 @@
 package util
 
 import (
-	"fmt"
-	"reflect"
 	"time"
 
 	gt "github.com/buger/goterm"
@@ -28,30 +26,6 @@ func RunGame(gameConfig GameConfig, initPattern Pattern) {
 
 		time.Sleep(gameConfig.Interval)
 	}
-}
-
-func GetConfigListString(gameConfig GameConfig) string {
-	var (
-		configList string
-		v          = reflect.ValueOf(gameConfig)
-		typeOfGC   = v.Type()
-	)
-
-	for i := 0; i < v.NumField(); i++ {
-		var (
-			key     = typeOfGC.Field(i).Name
-			value   = v.Field(i).Interface()
-			valType = reflect.TypeOf(value).Kind()
-		)
-
-		if valType == reflect.String {
-			value = fmt.Sprintf(`"%v"`, value)
-		}
-
-		configList += fmt.Sprintf("%v: %v  |  ", key, value)
-	}
-
-	return configList
 }
 
 // ClearAndSpawnCells updates the cell string that is printed to the command line.

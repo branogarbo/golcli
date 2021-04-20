@@ -1,8 +1,10 @@
 package util
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"reflect"
 )
 
 // GetFrameCellsByPattern converts a pattern string to frame cells.
@@ -141,4 +143,29 @@ func GetNewCell(gameConfig GameConfig, frameCells FrameCells, cell Cell) Cell {
 	}
 
 	return cell
+}
+
+// GetConfigListString returns config list string from gameConfig.
+func GetConfigListString(gameConfig GameConfig) string {
+	var (
+		configList string
+		v          = reflect.ValueOf(gameConfig)
+		typeOfGC   = v.Type()
+	)
+
+	for i := 0; i < v.NumField(); i++ {
+		var (
+			key     = typeOfGC.Field(i).Name
+			value   = v.Field(i).Interface()
+			valType = reflect.TypeOf(value).Kind()
+		)
+
+		if valType == reflect.String {
+			value = fmt.Sprintf(`"%v"`, value)
+		}
+
+		configList += fmt.Sprintf("%v: %v  |  ", key, value)
+	}
+
+	return configList
 }
