@@ -1,7 +1,8 @@
 package util
 
 import (
-	"os"
+	"fmt"
+	"reflect"
 	"time"
 
 	gt "github.com/buger/goterm"
@@ -29,12 +30,36 @@ func RunGame(gameConfig GameConfig, initPattern Pattern) {
 	}
 }
 
+func GetConfigListString(gameConfig GameConfig) string {
+	var (
+		configList string
+		v          = reflect.ValueOf(gameConfig)
+		typeOfGC   = v.Type()
+	)
+
+	for i := 0; i < v.NumField(); i++ {
+		var (
+			key     = typeOfGC.Field(i).Name
+			value   = v.Field(i).Interface()
+			valType = reflect.TypeOf(value).Kind()
+		)
+
+		if valType == reflect.String {
+			value = fmt.Sprintf(`"%v"`, value)
+		}
+
+		configList += fmt.Sprintf("%v: %v  |  ", key, value)
+	}
+
+	return configList
+}
+
 // ClearAndSpawnCells updates the cell string that is printed to the command line.
 func ClearAndSpawnCells(gameConfig GameConfig, frameCells FrameCells) {
 	var (
 		cellNum      int
 		outputString string
-		argString    string
+		configList   string = GetConfigListString(gameConfig)
 	)
 
 	for row := 0; row < gameConfig.Height; row++ {
@@ -52,13 +77,9 @@ func ClearAndSpawnCells(gameConfig GameConfig, frameCells FrameCells) {
 		outputString += "\n"
 	}
 
-	for _, arg := range os.Args {
-		argString += arg + " "
-	}
-
 	gt.MoveCursor(1, 1)
 
-	gt.Println(gt.Color(argString, gt.YELLOW))
+	gt.Println(gt.Color(configList, gt.YELLOW))
 	gt.Print(outputString)
 
 	gt.Flush()
