@@ -4,19 +4,26 @@ import (
 	"time"
 
 	gt "github.com/buger/goterm"
+	pb "github.com/cheggaaa/pb/v3"
 )
 
 // RunGame runs the game based on the passed args.
 func RunGame(gameConfig GameConfig, initPattern Pattern) {
 	var (
-		iValComparer                          = gameConfig.FrameCount
 		frameCells                            = GetFrameCellsByPattern(gameConfig, initPattern)
 		gameConfigString, patternConfigString = GetConfigListStrings(gameConfig, initPattern)
+		pbTemplate                            = `{{ etime . }} {{ bar . "[" "=" ">" " " "]" }} {{speed . }} {{percent . }}`
+		progressBar                           = pb.ProgressBarTemplate(pbTemplate).Start(gameConfig.FrameCount).SetMaxWidth(100)
 	)
 
-	if gameConfig.FrameCount == -1 {
-		iValComparer = 9223372036854775807
+	for i := 0; i < gameConfig.FrameCount; i++ {
+		// go func() {
+		frameCells = UpdateCells(gameConfig, frameCells)
+		progressBar.Increment()
+		// }()
 	}
+
+	progressBar.Finish()
 
 	gt.Clear()
 
@@ -25,10 +32,8 @@ func RunGame(gameConfig GameConfig, initPattern Pattern) {
 	gt.Println(gt.Color(gameConfigString, gt.YELLOW))
 	gt.Println(gt.Color(patternConfigString, gt.CYAN))
 
-	for i := 0; i < iValComparer; i++ {
+	for i := 0; i < gameConfig.FrameCount; i++ {
 		ClearAndSpawnCells(gameConfig, frameCells)
-
-		frameCells = UpdateCells(gameConfig, frameCells)
 
 		time.Sleep(gameConfig.Interval)
 	}
