@@ -28,7 +28,7 @@ func RunGame(gameConfig GameConfig, initPattern Pattern) {
 	for i := 0; i < iValComparer; i++ {
 		ClearAndSpawnCells(gameConfig, frameCells)
 
-		frameCells = UpdateCells(gameConfig, frameCells)
+		UpdateCells(gameConfig, &frameCells)
 
 		time.Sleep(gameConfig.Interval)
 	}
@@ -63,15 +63,15 @@ func ClearAndSpawnCells(gameConfig GameConfig, frameCells FrameCells) {
 	gt.Flush()
 }
 
-// UpdateCells returns new frame cells after evaluating the living state of frameCells.
-func UpdateCells(gameConfig GameConfig, frameCells FrameCells) FrameCells {
+// UpdateCells updates the value of the pointer frameCells after evaluating the living states of its cells.
+func UpdateCells(gameConfig GameConfig, frameCells *FrameCells) {
 	var (
 		newFrameCells FrameCells
 		newCell       Cell
 	)
 
-	for _, cell := range frameCells {
-		newCell = GetNewCell(gameConfig, frameCells, cell)
+	for _, cell := range *frameCells {
+		newCell = GetNewCell(gameConfig, *frameCells, cell)
 
 		newFrameCells = append(newFrameCells, newCell)
 	}
@@ -80,5 +80,5 @@ func UpdateCells(gameConfig GameConfig, frameCells FrameCells) FrameCells {
 		newFrameCells[i].LivingNeighbors = GetLivingNeighborsByCoord(gameConfig, newFrameCells, newFrameCells[i].X, newFrameCells[i].Y)
 	}
 
-	return newFrameCells
+	*frameCells = newFrameCells
 }
