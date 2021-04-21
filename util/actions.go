@@ -10,17 +10,21 @@ import (
 // RunGame runs the game based on the passed args.
 func RunGame(gameConfig GameConfig, initPattern Pattern) {
 	var (
-		frameCells                            = GetFrameCellsByPattern(gameConfig, initPattern)
+		lastFrameCells                        = GetFrameCellsByPattern(gameConfig, initPattern)
+		frames                                = make(chan FrameCells, gameConfig.FrameCount)
 		gameConfigString, patternConfigString = GetConfigListStrings(gameConfig, initPattern)
 		pbTemplate                            = `{{ etime . }} {{ bar . "[" "=" ">" " " "]" }} {{speed . }} {{percent . }}`
 		progressBar                           = pb.ProgressBarTemplate(pbTemplate).Start(gameConfig.FrameCount).SetMaxWidth(100)
 	)
 
 	for i := 0; i < gameConfig.FrameCount; i++ {
-		// go func() {
-		frameCells = UpdateCells(gameConfig, frameCells)
+		newFrameCells := GenUpdatedCells(gameConfig, lastFrameCells)
+		frames <- newFrameCells
+
+		lastFrameCells = newFrameCells
+
 		progressBar.Increment()
-		// }()
+
 	}
 
 	progressBar.Finish()
@@ -33,7 +37,7 @@ func RunGame(gameConfig GameConfig, initPattern Pattern) {
 	gt.Println(gt.Color(patternConfigString, gt.CYAN))
 
 	for i := 0; i < gameConfig.FrameCount; i++ {
-		ClearAndSpawnCells(gameConfig, frameCells)
+		ClearAndSpawnCells(gameConfig, <-frames)
 
 		time.Sleep(gameConfig.Interval)
 	}
@@ -68,8 +72,8 @@ func ClearAndSpawnCells(gameConfig GameConfig, frameCells FrameCells) {
 	gt.Flush()
 }
 
-// UpdateCells returns new frame cells after evaluating the living state of frameCells.
-func UpdateCells(gameConfig GameConfig, frameCells FrameCells) FrameCells {
+// GenUpdatedCells updates the value of the pointer frameCells after evaluating the living states of its cells.
+func GenUpdatedCells(gameConfig GameConfig, frameCells FrameCells) FrameCells {
 	var (
 		newFrameCells FrameCells
 		newCell       Cell
