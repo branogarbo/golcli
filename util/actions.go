@@ -9,8 +9,9 @@ import (
 // RunGame runs the game based on the passed args.
 func RunGame(gameConfig GameConfig, initPattern Pattern) {
 	var (
-		iValComparer = gameConfig.FrameCount
-		frameCells   = GetFrameCellsByPattern(gameConfig, initPattern)
+		iValComparer                          = gameConfig.FrameCount
+		frameCells                            = GetFrameCellsByPattern(gameConfig, initPattern)
+		gameConfigString, patternConfigString = GetConfigListStrings(gameConfig, initPattern)
 	)
 
 	if gameConfig.FrameCount == -1 {
@@ -18,6 +19,11 @@ func RunGame(gameConfig GameConfig, initPattern Pattern) {
 	}
 
 	gt.Clear()
+
+	gt.MoveCursor(1, 1)
+
+	gt.Println(gt.Color(gameConfigString, gt.YELLOW))
+	gt.Println(gt.Color(patternConfigString, gt.CYAN))
 
 	for i := 0; i < iValComparer; i++ {
 		ClearAndSpawnCells(gameConfig, frameCells)
@@ -33,7 +39,6 @@ func ClearAndSpawnCells(gameConfig GameConfig, frameCells FrameCells) {
 	var (
 		cellNum      int
 		outputString string
-		configList   string = GetConfigListString(gameConfig)
 	)
 
 	for row := 0; row < gameConfig.Height; row++ {
@@ -51,9 +56,8 @@ func ClearAndSpawnCells(gameConfig GameConfig, frameCells FrameCells) {
 		outputString += "\n"
 	}
 
-	gt.MoveCursor(1, 1)
+	gt.MoveCursor(1, 3)
 
-	gt.Println(gt.Color(configList, gt.YELLOW))
 	gt.Print(outputString)
 
 	gt.Flush()

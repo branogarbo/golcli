@@ -146,17 +146,26 @@ func GetNewCell(gameConfig GameConfig, frameCells FrameCells, cell Cell) Cell {
 }
 
 // GetConfigListString returns config list string from gameConfig.
-func GetConfigListString(gameConfig GameConfig) string {
+func GetConfigListStrings(gameConfig GameConfig, patternConfig Pattern) (string, string) {
 	var (
-		configList string
-		v          = reflect.ValueOf(gameConfig)
-		typeOfGC   = v.Type()
+		gameConfigString    = ParseConfigToString(gameConfig)
+		patternConfigString = ParseConfigToString(patternConfig)
 	)
 
-	for i := 0; i < v.NumField(); i++ {
+	return gameConfigString, patternConfigString
+}
+
+func ParseConfigToString(config interface{}) string {
+	var (
+		configList string
+		clv        = reflect.ValueOf(config)
+		typeOfCLV  = clv.Type()
+	)
+
+	for i := 0; i < clv.NumField(); i++ {
 		var (
-			key     = typeOfGC.Field(i).Name
-			value   = v.Field(i).Interface()
+			key     = typeOfCLV.Field(i).Name
+			value   = clv.Field(i).Interface()
 			valType = reflect.TypeOf(value).Kind()
 		)
 
