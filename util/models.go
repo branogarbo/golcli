@@ -19,8 +19,6 @@ import "time"
 
 type FrameCells []Cell
 
-type CellNeighbors []Cell
-
 type Pattern struct {
 	Path string
 	X    int
@@ -37,8 +35,8 @@ type GameConfig struct {
 }
 
 type Cell struct {
-	X               int
-	Y               int
-	IsAlive         bool
-	LivingNeighbors CellNeighbors
+	X                  int
+	Y                  int
+	IsAlive            bool
+	LivingNeighborsNum int
 }

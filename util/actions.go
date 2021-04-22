@@ -77,7 +77,7 @@ func UpdateCells(gameConfig GameConfig, frameCells *FrameCells) {
 	}
 
 	for i := range newFrameCells {
-		newFrameCells[i].LivingNeighbors = GetLivingNeighborsByCoord(gameConfig, newFrameCells, newFrameCells[i].X, newFrameCells[i].Y)
+		newFrameCells[i].LivingNeighborsNum = GetLivingNeighborsByCoord(gameConfig, newFrameCells, newFrameCells[i].X, newFrameCells[i].Y)
 	}
 
 	*frameCells = newFrameCells
