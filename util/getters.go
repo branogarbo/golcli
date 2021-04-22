@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"reflect"
+
+	pb "github.com/cheggaaa/pb/v3"
 )
 
 // GetFrameCellsByPattern converts a pattern string to frame cells.
@@ -57,7 +59,7 @@ func GetFrameCellsByPattern(gameConfig GameConfig, pattern Pattern) FrameCells {
 	}
 
 	for i := range frameCells {
-		frameCells[i].LivingNeighbors = GetLivingNeighborsByCoord(gameConfig, frameCells, frameCells[i].X, frameCells[i].Y)
+		frameCells[i].LivingNeighborsNum = GetLivingNeighborsNumByCoord(gameConfig, frameCells, frameCells[i].X, frameCells[i].Y)
 	}
 
 	return frameCells
@@ -82,12 +84,12 @@ func GetCellByCoord(gameConfig GameConfig, frameCells FrameCells, x, y int) Cell
 }
 
 // GetLivingNeighborsByCoord returns a slice of cells that neighbor the cell at (x,y).
-func GetLivingNeighborsByCoord(gameConfig GameConfig, frameCells FrameCells, x, y int) CellNeighbors {
+func GetLivingNeighborsNumByCoord(gameConfig GameConfig, frameCells FrameCells, x, y int) int {
 	if IsCoordOutOfFrame(gameConfig, x, y) {
 		log.Fatal("GetLivingNeighborsByCoord: coord is out of frame")
 	}
 
-	var cellLivingNeighbors CellNeighbors
+	var livingNeighborsNum int
 
 	for relX := -1; relX <= 1; relX++ {
 		for relY := -1; relY <= 1; relY++ {
@@ -100,13 +102,13 @@ func GetLivingNeighborsByCoord(gameConfig GameConfig, frameCells FrameCells, x, 
 				cell := GetCellByCoord(gameConfig, frameCells, targetX, targetY)
 
 				if cell.IsAlive {
-					cellLivingNeighbors = append(cellLivingNeighbors, cell)
+					livingNeighborsNum++
 				}
 			}
 		}
 	}
 
-	return cellLivingNeighbors
+	return livingNeighborsNum
 }
 
 // IsCoordOutOfFrame returns whether or not the cell at (x,y) is out of the frame.
@@ -120,7 +122,7 @@ func GetNewCell(gameConfig GameConfig, frameCells FrameCells, cell Cell) Cell {
 		log.Fatal("GetNewCell: coord is out of frame")
 	}
 
-	livingNeighbors := GetLivingNeighborsByCoord(gameConfig, frameCells, cell.X, cell.Y)
+	livingNeighbors := GetLivingNeighborsNumByCoord(gameConfig, frameCells, cell.X, cell.Y)
 
 	// Any live cell with fewer than two live neighbours dies, as if by underpopulation.
 	// Any live cell with two or three live neighbours lives on to the next generation.
@@ -134,9 +136,9 @@ func GetNewCell(gameConfig GameConfig, frameCells FrameCells, cell Cell) Cell {
 	// All other live cells die in the next generation. Similarly, all other dead cells stay dead.
 
 	// i know this part can be more concise but this is for readability
-	if cell.IsAlive && (len(livingNeighbors) == 2 || len(livingNeighbors) == 3) {
+	if cell.IsAlive && (livingNeighbors == 2 || livingNeighbors == 3) {
 		cell.IsAlive = true
-	} else if !cell.IsAlive && len(livingNeighbors) == 3 {
+	} else if !cell.IsAlive && livingNeighbors == 3 {
 		cell.IsAlive = true
 	} else {
 		cell.IsAlive = false
@@ -145,17 +147,8 @@ func GetNewCell(gameConfig GameConfig, frameCells FrameCells, cell Cell) Cell {
 	return cell
 }
 
-// GetConfigListString returns config list string from gameConfig.
-func GetConfigListStrings(gameConfig GameConfig, patternConfig Pattern) (string, string) {
-	var (
-		gameConfigString    = ParseConfigToString(gameConfig)
-		patternConfigString = ParseConfigToString(patternConfig)
-	)
-
-	return gameConfigString, patternConfigString
-}
-
-func ParseConfigToString(config interface{}) string {
+// GetConfigListString returns config list string from config.
+func GetConfigListString(config interface{}) string {
 	var (
 		configList string
 		clv        = reflect.ValueOf(config)
@@ -177,4 +170,26 @@ func ParseConfigToString(config interface{}) string {
 	}
 
 	return configList
+}
+
+// GenerateFrames returns a chan of frameCells that represent each frame in the game.
+func GenFramesFromPattern(gameConfig GameConfig, initPattern Pattern) Frames {
+	var (
+		frameCells  = GetFrameCellsByPattern(gameConfig, initPattern)
+		frames      = Frames{frameCells}
+		pbTemplate  = `Loading frames: {{ etime . }} {{ bar . "[" "=" ">" " " "]" }} {{speed . }} {{percent . }}`
+		progressBar = pb.ProgressBarTemplate(pbTemplate).Start(gameConfig.FrameCount).SetMaxWidth(100)
+	)
+
+	for i := 0; i < gameConfig.FrameCount; i++ {
+		UpdateCells(gameConfig, &frameCells)
+		frames = append(frames, frameCells)
+
+		progressBar.Increment()
+
+	}
+
+	progressBar.Finish()
+
+	return frames
 }

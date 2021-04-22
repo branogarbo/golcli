@@ -1,43 +1,28 @@
 package util
 
 import (
+	"encoding/json"
+	"fmt"
+	"os"
 	"time"
 
 	gt "github.com/buger/goterm"
-	pb "github.com/cheggaaa/pb/v3"
 )
 
 // RunGame runs the game based on the passed args.
-func RunGame(gameConfig GameConfig, initPattern Pattern) {
+func RunFrames(gameConfig GameConfig, frames Frames) {
 	var (
-		lastFrameCells                        = GetFrameCellsByPattern(gameConfig, initPattern)
-		frames                                = make(chan FrameCells, gameConfig.FrameCount)
-		gameConfigString, patternConfigString = GetConfigListStrings(gameConfig, initPattern)
-		pbTemplate                            = `{{ etime . }} {{ bar . "[" "=" ">" " " "]" }} {{speed . }} {{percent . }}`
-		progressBar                           = pb.ProgressBarTemplate(pbTemplate).Start(gameConfig.FrameCount).SetMaxWidth(100)
+		gameConfigString = GetConfigListString(gameConfig)
 	)
-
-	for i := 0; i < gameConfig.FrameCount; i++ {
-		newFrameCells := GenUpdatedCells(gameConfig, lastFrameCells)
-		frames <- newFrameCells
-
-		lastFrameCells = newFrameCells
-
-		progressBar.Increment()
-
-	}
-
-	progressBar.Finish()
 
 	gt.Clear()
 
 	gt.MoveCursor(1, 1)
 
 	gt.Println(gt.Color(gameConfigString, gt.YELLOW))
-	gt.Println(gt.Color(patternConfigString, gt.CYAN))
 
-	for i := 0; i < gameConfig.FrameCount; i++ {
-		ClearAndSpawnCells(gameConfig, <-frames)
+	for _, frameCells := range frames {
+		ClearAndSpawnCells(gameConfig, frameCells)
 
 		time.Sleep(gameConfig.Interval)
 	}
@@ -72,22 +57,81 @@ func ClearAndSpawnCells(gameConfig GameConfig, frameCells FrameCells) {
 	gt.Flush()
 }
 
-// GenUpdatedCells updates the value of the pointer frameCells after evaluating the living states of its cells.
-func GenUpdatedCells(gameConfig GameConfig, frameCells FrameCells) FrameCells {
+// UpdateCells updates the value of the pointer frameCells after evaluating the living states of its cells.
+func UpdateCells(gameConfig GameConfig, frameCells *FrameCells) {
 	var (
 		newFrameCells FrameCells
 		newCell       Cell
 	)
 
-	for _, cell := range frameCells {
-		newCell = GetNewCell(gameConfig, frameCells, cell)
+	for _, cell := range *frameCells {
+		newCell = GetNewCell(gameConfig, *frameCells, cell)
 
 		newFrameCells = append(newFrameCells, newCell)
 	}
 
 	for i := range newFrameCells {
-		newFrameCells[i].LivingNeighbors = GetLivingNeighborsByCoord(gameConfig, newFrameCells, newFrameCells[i].X, newFrameCells[i].Y)
+		newFrameCells[i].LivingNeighborsNum = GetLivingNeighborsNumByCoord(gameConfig, newFrameCells, newFrameCells[i].X, newFrameCells[i].Y)
 	}
 
-	return newFrameCells
+	*frameCells = newFrameCells
+}
+
+// GenBuildFile creates a build file from the initPattern and gameConfig.
+// If the destination file already exists, it will be overwritten.
+func GenBuildFile(gameConfig GameConfig, initPattern Pattern, buildFile string) error {
+	var (
+		frames     = GenFramesFromPattern(gameConfig, initPattern)
+		framesJSON []byte
+		err        error
+	)
+
+	fmt.Println("Encoding to JSON...")
+
+	framesJSON, err = json.Marshal(frames)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Writing JSON to file...")
+
+	err = os.WriteFile(buildFile, framesJSON, 0666)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Done. Saved to", buildFile)
+
+	return nil
+}
+
+//
+func GenFramesFromBuildFile(gameConfig GameConfig, buildFile string) (Frames, error) {
+	var (
+		frames         Frames
+		jsonBytes, err = os.ReadFile(buildFile)
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(jsonBytes, &frames)
+	if err != nil {
+		return nil, err
+	}
+
+	return frames, nil
+}
+
+func RunBuildFile(gameConfig GameConfig, buildFilePath string) error {
+	var (
+		frames, err = GenFramesFromBuildFile(gameConfig, buildFilePath)
+	)
+	if err != nil {
+		return err
+	}
+
+	RunFrames(gameConfig, frames)
+
+	return nil
 }
