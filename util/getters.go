@@ -149,6 +149,7 @@ func GetConfigListStrings(gameConfig GameConfig, patternConfig Pattern) (string,
 	return gameConfigString, patternConfigString
 }
 
+// ParseConfigToString returns a config string of config.
 func ParseConfigToString(config interface{}) string {
 	var (
 		configList string
