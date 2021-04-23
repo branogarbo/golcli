@@ -43,7 +43,6 @@ var rootCmd = &cobra.Command{
 	Args:    cobra.MaximumNArgs(1),
 	Example: `golcli -c 500 -l "##" -d "--" ./pattern.txt`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		if len(args) == 0 {
 			patternPath = "./pattern.txt"
 		} else {
@@ -93,7 +92,7 @@ func init() {
 	rootCmd.Flags().IntVarP(&frameCount, "count", "c", -1, "The number of frames displayed before exiting (-1 : infinite loop)")
 	rootCmd.Flags().IntVarP(&frameInterval, "interval", "i", 30, "The number of milliseconds between frames")
 	rootCmd.Flags().StringVarP(&livingCellChar, "live-char", "l", "  ", "The character(s) that represent a live cell")
-	rootCmd.Flags().StringVarP(&deadCellChar, "dead-char", "d", "██", "The character(s) that represent a live cell")
+	rootCmd.Flags().StringVarP(&deadCellChar, "dead-char", "d", "██", "The character(s) that represent a dead cell")
 	rootCmd.Flags().IntVarP(&patternX, "pattern-x", "x", 12, "The x offset of the initial pattern")
 	rootCmd.Flags().IntVarP(&patternY, "pattern-y", "y", 8, "The y offset of the initial pattern")
 }
