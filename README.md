@@ -35,7 +35,7 @@ Available Commands:
   run         Runs a build file.
 
 Flags:
-  -c, --count int          The number of frames displayed before exiting (default 1000)
+  -c, --count int          The number of frames displayed before exiting (-1 : infinite loop) (default -1)
   -d, --dead-char string   The character(s) that represent a dead cell (default "██")
   -H, --height int         The height of the frames (default 30)
   -h, --help               help for golcli
@@ -59,7 +59,7 @@ Examples:
 golcli build -W 70 -c 400 ./pattern.txt ./build.json
 
 Flags:
-  -c, --count int       The number of frames displayed before exiting (default 1000)
+  -c, --count int       The number of frames displayed before exiting (-1 : infinite loop) (default 1000)
   -H, --height int      The height of the frames (default 30)
   -h, --help            help for build
   -x, --pattern-x int   The x offset of the initial pattern (default 12)
