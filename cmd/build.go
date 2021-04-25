@@ -8,13 +8,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	frameWidth      int
+	frameHeight     int
+	frameCount      int
+	patternX        int
+	patternY        int
+	patternFilePath string
+	buildFilePath   string
+)
+
 var buildCmd = &cobra.Command{
 	Use:     "build",
 	Short:   "Creates a build file from a pattern file.",
+	Example: `golcli build -W 70 -c 400 ./pattern.txt ./build.json`,
 	Args:    cobra.ExactArgs(2),
-	Example: `golcli build ./pattern.txt`,
 	Run: func(cmd *cobra.Command, args []string) {
-		patternPath = args[0]
+		patternFilePath = args[0]
 		buildFilePath = args[1]
 
 		frameWidth, err = cmd.Flags().GetInt("width")
@@ -28,19 +38,19 @@ var buildCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		gameConfig := u.GameConfig{
-			Width:      frameWidth,
-			Height:     frameHeight,
-			FrameCount: frameCount,
+		bc := u.BuildConfig{
+			BuildFilePath: buildFilePath,
+			Width:         frameWidth,
+			Height:        frameHeight,
+			FrameCount:    frameCount,
+			InitPattern: u.Pattern{
+				FilePath: patternFilePath,
+				X:        patternX,
+				Y:        patternY,
+			},
 		}
 
-		initPattern := u.Pattern{
-			Path: patternPath,
-			X:    patternX,
-			Y:    patternY,
-		}
-
-		err = u.GenBuildFile(gameConfig, initPattern, buildFilePath)
+		err = bc.GenBuildFile()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -53,7 +63,7 @@ func init() {
 
 	buildCmd.Flags().IntVarP(&frameWidth, "width", "W", 40, "The width of the frames")
 	buildCmd.Flags().IntVarP(&frameHeight, "height", "H", 30, "The height of the frames")
-	buildCmd.Flags().IntVarP(&frameCount, "count", "c", 10000, "The number of frames displayed before exiting")
+	buildCmd.Flags().IntVarP(&frameCount, "count", "c", 1000, "The number of frames displayed before exiting")
 	buildCmd.Flags().IntVarP(&patternX, "pattern-x", "x", 12, "The x offset of the initial pattern")
 	buildCmd.Flags().IntVarP(&patternY, "pattern-y", "y", 8, "The y offset of the initial pattern")
 }

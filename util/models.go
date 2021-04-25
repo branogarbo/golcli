@@ -18,28 +18,54 @@ package util
 import "time"
 
 type (
-	FrameCells []Cell
-	Frames     []FrameCells
+	Cells  []Cell
+	Frames []Frame
 )
 
+type Cell struct {
+	X               int  `json:"x"`
+	Y               int  `json:"y"`
+	IsAlive         bool `json:"isAlive"`
+	LiveNeighborNum int  `json:"LiveNeighborNum"`
+}
+
+type Frame struct {
+	FrameNum int `json:"frameNum"`
+	Cells    `json:"cells"`
+}
+
 type Pattern struct {
-	Path string
-	X    int
-	Y    int
+	FilePath string `json:"filePath"`
+	X        int    `json:"x"`
+	Y        int    `json:"y"`
+}
+
+type GameData struct {
+	BuildConfig `json:"buildConfig"`
+	Frames      `json:"frames"`
+}
+
+type BuildConfig struct {
+	BuildFilePath string  `json:"buildFilePath"`
+	Width         int     `json:"width"`
+	Height        int     `json:"height"`
+	FrameCount    int     `json:"frameCount"`
+	InitPattern   Pattern `json:"initPattern"`
+}
+
+type RunConfig struct {
+	BuildFilePath string        `json:"buildFilePath"`
+	Interval      time.Duration `json:"interval"`
+	LiveCellChar  string        `json:"liveCellChar"`
+	DeadCellChar  string        `json:"deadCellChar"`
 }
 
 type GameConfig struct {
-	Width          int
-	Height         int
-	FrameCount     int
-	Interval       time.Duration
-	DeadCellChar   string
-	LivingCellChar string
-}
-
-type Cell struct {
-	X                  int
-	Y                  int
-	IsAlive            bool
-	LivingNeighborsNum int
+	Width        int           `json:"width"`
+	Height       int           `json:"height"`
+	FrameCount   int           `json:"frameCount"`
+	InitPattern  Pattern       `json:"initPattern"`
+	Interval     time.Duration `json:"interval"`
+	LiveCellChar string        `json:"liveCellChar"`
+	DeadCellChar string        `json:"deadCellChar"`
 }

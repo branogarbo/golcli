@@ -23,19 +23,51 @@ golcli
 A basic CLI implementation of Conway's Game of Life.
 
 Usage:
-  golcli [flags]
+  golcli [command]
 
-Examples:
-golcli -c 500 -l "##" -d "--" ./pattern.txt
+Available Commands:
+  build       Creates a build file from a pattern file.
+  help        Help about any command
+  run         Runs a build golci file.
 
 Flags:
-  -c, --count int          The number of frames displayed before exiting (-1 : infinite loop) (default -1)
-  -d, --dead-char string   The character(s) that represent a live cell (default "  ")
-  -H, --height int         The height of the frames (default 30)
-  -h, --help               help for golcli
+  -h, --help   help for golcli
+
+Use "golcli [command] --help" for more information about a command.
+```
+
+### **build:**
+```
+Creates a build file from a pattern file.
+
+Usage:
+  golcli build [flags]
+
+Examples:
+golcli build ./pattern.txt ./build.json
+
+Flags:
+  -c, --count int       The number of frames displayed before exiting (default 1000)
+  -H, --height int      The height of the frames (default 30)
+  -h, --help            help for build
+  -x, --pattern-x int   The x offset of the initial pattern (default 12)
+  -y, --pattern-y int   The y offset of the initial pattern (default 8)
+  -W, --width int       The width of the frames (default 40)
+```
+
+### **run:**
+```
+Runs a build file.
+
+Usage:
+  golcli run [flags]
+
+Examples:
+golcli run -l "##" -i 200 ./buildFile.json
+
+Flags:
+  -d, --dead-char string   The character(s) that represent a dead cell (default "██")
+  -h, --help               help for run
   -i, --interval int       The number of milliseconds between frames (default 50)
-  -l, --live-char string   The character(s) that represent a live cell (default "██")
-  -x, --pattern-x int      The x offset of the initial pattern (default 12)
-  -y, --pattern-y int      The y offset of the initial pattern (default 8)
-  -W, --width int          The width of the frames (default 40)
+  -l, --live-char string   The character(s) that represent a live cell (default "  ")
 ```

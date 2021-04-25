@@ -19,19 +19,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	frameWidth     int
-	frameHeight    int
-	frameCount     int
-	frameInterval  int
-	livingCellChar string
-	deadCellChar   string
-	patternPath    string
-	patternX       int
-	patternY       int
-	buildFilePath  string
-	err            error
-)
+var err error
 
 var rootCmd = &cobra.Command{
 	Use:   "golcli",
