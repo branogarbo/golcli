@@ -8,16 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	frameWidth      int
-	frameHeight     int
-	frameCount      int
-	patternX        int
-	patternY        int
-	patternFilePath string
-	buildFilePath   string
-)
-
 var buildCmd = &cobra.Command{
 	Use:     "build",
 	Short:   "Creates a build file from a pattern file.",
@@ -50,7 +40,7 @@ var buildCmd = &cobra.Command{
 			},
 		}
 
-		err = bc.GenBuildFile()
+		err = u.GenBuildFile(bc)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

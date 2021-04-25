@@ -11,9 +11,9 @@ import (
 
 // GenBuildFile creates a build file from bc.If the destination
 // file already exists, it will be overwritten.
-func (bc BuildConfig) GenBuildFile() error {
+func GenBuildFile(bc BuildConfig) error {
 	var (
-		frames     = bc.GenFramesFromPattern()
+		frames     = GenFramesFromPattern(bc)
 		framesJSON []byte
 		err        error
 	)
@@ -41,21 +41,54 @@ func (bc BuildConfig) GenBuildFile() error {
 }
 
 // RunBuildFile runs a build file according to the parameters passed in rc.
-func (rc RunConfig) RunBuildFile() error {
+func RunBuildFile(rc RunConfig) error {
 	fmt.Println("Loading Game Data...")
 
-	gameData, err := rc.GenGameDataFromBuildFile()
+	gameData, err := GenGameDataFromBuildFile(rc)
 	if err != nil {
 		return err
 	}
 
-	rc.RunFrames(gameData)
+	RunFrames(gameData, rc)
 
 	return nil
 }
 
-// RunFrames runs the frames based on the passed game data.
-func (rc RunConfig) RunFrames(gd GameData) {
+// BruteRunGame runs the game with in-time building.
+func BruteRunGame(gc GameConfig) {
+	var (
+		bc = BuildConfig{
+			Width:       gc.Width,
+			Height:      gc.Height,
+			FrameCount:  gc.FrameCount,
+			InitPattern: gc.InitPattern,
+		}
+		iValComparer                          = gc.FrameCount
+		frameCells                            = GenCellsFromPattern(bc)
+		gameConfigString, patternConfigString = GetConfigListStrings(gc)
+	)
+
+	if gc.FrameCount == -1 {
+		iValComparer = 9223372036854775807
+	}
+
+	gt.Clear()
+	gt.MoveCursor(1, 1)
+
+	gt.Println(gt.Color(gameConfigString, gt.YELLOW))
+	gt.Println(gt.Color(patternConfigString, gt.CYAN))
+
+	for i := 0; i < iValComparer; i++ {
+		ClearAndDrawFrames(gc, frameCells)
+
+		UpdateCells(bc, &frameCells)
+
+		time.Sleep(gc.Interval)
+	}
+}
+
+// RunFrames runs the frames based on the passed game data and run config.
+func RunFrames(gd GameData, rc RunConfig) {
 	var (
 		bc = gd.BuildConfig
 		gc = GameConfig{
@@ -67,7 +100,7 @@ func (rc RunConfig) RunFrames(gd GameData) {
 			LiveCellChar: rc.LiveCellChar,
 			DeadCellChar: rc.DeadCellChar,
 		}
-		gameConfigString, patternConfigString = gc.GetConfigListStrings()
+		gameConfigString, patternConfigString = GetConfigListStrings(gc)
 	)
 
 	gt.Clear()
@@ -77,7 +110,7 @@ func (rc RunConfig) RunFrames(gd GameData) {
 	gt.Println(gt.Color(patternConfigString, gt.CYAN))
 
 	for _, frame := range gd.Frames {
-		rc.ClearAndDrawFrames(gd, frame.Cells)
+		ClearAndDrawFrames(gc, frame.Cells)
 
 		time.Sleep(rc.Interval)
 	}
@@ -91,34 +124,33 @@ func UpdateCells(bc BuildConfig, frameCells *Cells) {
 	)
 
 	for _, cell := range *frameCells {
-		newCell = bc.GetNewCell(*frameCells, cell)
+		newCell = GetNewCell(bc, *frameCells, cell)
 
 		newFrameCells = append(newFrameCells, newCell)
 	}
 
 	for i := range newFrameCells {
-		newFrameCells[i].LiveNeighborNum = bc.GetLiveNeighborNumByCoord(newFrameCells, newFrameCells[i].X, newFrameCells[i].Y)
+		newFrameCells[i].LiveNeighborNum = GetLiveNeighborNumByCoord(bc, newFrameCells, newFrameCells[i].X, newFrameCells[i].Y)
 	}
 
 	*frameCells = newFrameCells
 }
 
 // ClearAndDrawFrames updates the frame that is printed to the command line.
-func (rc RunConfig) ClearAndDrawFrames(gd GameData, frameCells Cells) {
+func ClearAndDrawFrames(gc GameConfig, frameCells Cells) {
 	var (
 		cellNum      int
 		outputString string
-		bc           = gd.BuildConfig
 	)
 
-	for row := 0; row < bc.Height; row++ {
-		for col := 0; col < bc.Width; col++ {
+	for row := 0; row < gc.Height; row++ {
+		for col := 0; col < gc.Width; col++ {
 			cell := frameCells[cellNum]
 
 			if cell.IsAlive {
-				outputString += rc.LiveCellChar
+				outputString += gc.LiveCellChar
 			} else {
-				outputString += rc.DeadCellChar
+				outputString += gc.DeadCellChar
 			}
 
 			cellNum++

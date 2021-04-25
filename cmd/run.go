@@ -9,12 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	frameInterval  int
-	livingCellChar string
-	deadCellChar   string
-)
-
 var runCmd = &cobra.Command{
 	Use:     "run",
 	Short:   "Runs a build file.",
@@ -39,7 +33,7 @@ var runCmd = &cobra.Command{
 			DeadCellChar:  deadCellChar,
 		}
 
-		err = rc.RunBuildFile()
+		err = u.RunBuildFile(rc)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
