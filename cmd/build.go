@@ -53,7 +53,7 @@ func init() {
 
 	buildCmd.Flags().IntVarP(&frameWidth, "width", "W", 40, "The width of the frames")
 	buildCmd.Flags().IntVarP(&frameHeight, "height", "H", 30, "The height of the frames")
-	buildCmd.Flags().IntVarP(&frameCount, "count", "c", 1000, "The number of frames displayed before exiting")
+	buildCmd.Flags().IntVarP(&frameCount, "count", "c", 1000, "The number of frames displayed before exiting (-1 : infinite loop)")
 	buildCmd.Flags().IntVarP(&patternX, "pattern-x", "x", 12, "The x offset of the initial pattern")
 	buildCmd.Flags().IntVarP(&patternY, "pattern-y", "y", 8, "The y offset of the initial pattern")
 }
