@@ -7,6 +7,7 @@ import (
 	"time"
 
 	gt "github.com/buger/goterm"
+	"github.com/klauspost/compress/s2"
 )
 
 // GenBuildFile creates a build file from bc.If the destination
@@ -28,9 +29,13 @@ func GenBuildFile(bc BuildConfig) error {
 		return err
 	}
 
-	fmt.Println("Writing JSON to file...")
+	fmt.Println("Compressing JSON...")
 
-	err = os.WriteFile(bc.BuildFilePath, framesJSON, 0666)
+	framesCompressed := s2.EncodeBest(nil, framesJSON)
+
+	fmt.Println("Writing compressed data to file...")
+
+	err = os.WriteFile(bc.BuildFilePath, framesCompressed, 0666)
 	if err != nil {
 		return err
 	}
@@ -42,8 +47,6 @@ func GenBuildFile(bc BuildConfig) error {
 
 // RunBuildFile runs a build file according to the parameters passed in rc.
 func RunBuildFile(rc RunConfig) error {
-	fmt.Println("Loading Game Data...")
-
 	gameData, err := GenGameDataFromBuildFile(rc)
 	if err != nil {
 		return err

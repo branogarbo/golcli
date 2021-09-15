@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	pb "github.com/cheggaaa/pb/v3"
+	"github.com/klauspost/compress/s2"
 )
 
 // GenCellsFromPattern converts a pattern string to frame cells.
@@ -209,10 +210,19 @@ func GenFramesFromPattern(bc BuildConfig) Frames {
 
 // GenGameDataFromBuildFile returns GameData that was stored in the targeted json build file.
 func GenGameDataFromBuildFile(rc RunConfig) (GameData, error) {
+	fmt.Println("Reading build file...")
+
 	var (
-		gameData       GameData
-		jsonBytes, err = os.ReadFile(rc.BuildFilePath)
+		gameData            GameData
+		compressedJSON, err = os.ReadFile(rc.BuildFilePath)
 	)
+	if err != nil {
+		return GameData{}, err
+	}
+
+	fmt.Println("Extracting JSON...")
+
+	jsonBytes, err := s2.Decode(nil, compressedJSON)
 	if err != nil {
 		return GameData{}, err
 	}

@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
 	"time"
 
 	u "github.com/branogarbo/golcli/util"
@@ -14,17 +12,12 @@ var runCmd = &cobra.Command{
 	Short:   "Runs a build file.",
 	Example: `golcli run -l "##" -i 200 ./buildFile.json`,
 	Args:    cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		buildFilePath = args[0]
+	RunE: func(cmd *cobra.Command, args []string) error {
+		buildFilePath := args[0]
 
-		frameInterval, err = cmd.Flags().GetInt("interval")
-		livingCellChar, err = cmd.Flags().GetString("live-char")
-		deadCellChar, err = cmd.Flags().GetString("dead-char")
-
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		frameInterval, _ := cmd.Flags().GetInt("interval")
+		livingCellChar, _ := cmd.Flags().GetString("live-char")
+		deadCellChar, _ := cmd.Flags().GetString("dead-char")
 
 		rc := u.RunConfig{
 			BuildFilePath: buildFilePath,
@@ -33,18 +26,14 @@ var runCmd = &cobra.Command{
 			DeadCellChar:  deadCellChar,
 		}
 
-		err = u.RunBuildFile(rc)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		return u.RunBuildFile(rc)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(runCmd)
 
-	runCmd.Flags().IntVarP(&frameInterval, "interval", "i", 50, "The number of milliseconds between frames")
-	runCmd.Flags().StringVarP(&livingCellChar, "live-char", "l", "  ", "The character(s) that represent a live cell")
-	runCmd.Flags().StringVarP(&deadCellChar, "dead-char", "d", "██", "The character(s) that represent a dead cell")
+	runCmd.Flags().IntP("interval", "i", 50, "The number of milliseconds between frames")
+	runCmd.Flags().StringP("live-char", "l", "  ", "The character(s) that represent a live cell")
+	runCmd.Flags().StringP("dead-char", "d", "██", "The character(s) that represent a dead cell")
 }

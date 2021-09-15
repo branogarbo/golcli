@@ -16,26 +16,10 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"os"
 	"time"
 
 	u "github.com/branogarbo/golcli/util"
 	"github.com/spf13/cobra"
-)
-
-var (
-	frameWidth      int
-	frameHeight     int
-	frameCount      int
-	patternX        int
-	patternY        int
-	patternFilePath string
-	buildFilePath   string
-	frameInterval   int
-	livingCellChar  string
-	deadCellChar    string
-	err             error
 )
 
 var rootCmd = &cobra.Command{
@@ -43,22 +27,17 @@ var rootCmd = &cobra.Command{
 	Short:   "A basic CLI implementation of Conway's Game of Life.",
 	Example: "golcli -c 100 -i 20 ./pattern.txt",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		patternFilePath = args[0]
+	RunE: func(cmd *cobra.Command, args []string) error {
+		patternFilePath := args[0]
 
-		frameWidth, err = cmd.Flags().GetInt("width")
-		frameHeight, err = cmd.Flags().GetInt("height")
-		frameCount, err = cmd.Flags().GetInt("count")
-		frameInterval, err = cmd.Flags().GetInt("interval")
-		livingCellChar, err = cmd.Flags().GetString("live-char")
-		deadCellChar, err = cmd.Flags().GetString("dead-char")
-		patternX, err = cmd.Flags().GetInt("pattern-x")
-		patternY, err = cmd.Flags().GetInt("pattern-y")
-
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		frameWidth, _ := cmd.Flags().GetInt("width")
+		frameHeight, _ := cmd.Flags().GetInt("height")
+		frameCount, _ := cmd.Flags().GetInt("count")
+		patternX, _ := cmd.Flags().GetInt("pattern-x")
+		patternY, _ := cmd.Flags().GetInt("pattern-y")
+		frameInterval, _ := cmd.Flags().GetInt("interval")
+		livingCellChar, _ := cmd.Flags().GetString("live-char")
+		deadCellChar, _ := cmd.Flags().GetString("dead-char")
 
 		gc := u.GameConfig{
 			Width:        frameWidth,
@@ -75,6 +54,8 @@ var rootCmd = &cobra.Command{
 		}
 
 		u.BruteRunGame(gc)
+
+		return nil
 	},
 }
 
@@ -83,12 +64,12 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().IntVarP(&frameInterval, "interval", "i", 50, "The number of milliseconds between frames")
-	rootCmd.Flags().StringVarP(&livingCellChar, "live-char", "l", "  ", "The character(s) that represent a live cell")
-	rootCmd.Flags().StringVarP(&deadCellChar, "dead-char", "d", "██", "The character(s) that represent a dead cell")
-	rootCmd.Flags().IntVarP(&frameWidth, "width", "W", 40, "The width of the frames")
-	rootCmd.Flags().IntVarP(&frameHeight, "height", "H", 30, "The height of the frames")
-	rootCmd.Flags().IntVarP(&frameCount, "count", "c", -1, "The number of frames displayed before exiting (-1 : infinite loop)")
-	rootCmd.Flags().IntVarP(&patternX, "pattern-x", "x", 12, "The x offset of the initial pattern")
-	rootCmd.Flags().IntVarP(&patternY, "pattern-y", "y", 8, "The y offset of the initial pattern")
+	rootCmd.Flags().IntP("interval", "i", 50, "The number of milliseconds between frames")
+	rootCmd.Flags().IntP("width", "W", 40, "The width of the frames")
+	rootCmd.Flags().IntP("height", "H", 30, "The height of the frames")
+	rootCmd.Flags().IntP("count", "c", -1, "The number of frames displayed before exiting (-1 : infinite loop)")
+	rootCmd.Flags().IntP("pattern-x", "x", 12, "The x offset of the initial pattern")
+	rootCmd.Flags().IntP("pattern-y", "y", 8, "The y offset of the initial pattern")
+	rootCmd.Flags().StringP("live-char", "l", "  ", "The character(s) that represent a live cell")
+	rootCmd.Flags().StringP("dead-char", "d", "██", "The character(s) that represent a dead cell")
 }
