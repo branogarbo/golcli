@@ -10,8 +10,8 @@ import (
 var runCmd = &cobra.Command{
 	Use:     "run",
 	Short:   "Runs a build file.",
-	Example: `golcli run -l "##" -i 200 ./buildFile.json`,
-	Args:    cobra.MaximumNArgs(1),
+	Example: `golcli run -l "##" -d ".." -i 200 buildFiles/pattern`,
+	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		buildFilePath := args[0]
 

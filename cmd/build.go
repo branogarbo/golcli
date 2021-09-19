@@ -8,11 +8,15 @@ import (
 var buildCmd = &cobra.Command{
 	Use:     "build",
 	Short:   "Creates a build file from a pattern file.",
-	Example: `golcli build -W 70 -c 400 ./pattern.txt ./build.json`,
-	Args:    cobra.ExactArgs(2),
+	Example: `golcli build -W 70 -c 400 pattern.txt builds/pattern`,
+	Args:    cobra.RangeArgs(1, 2),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var buildFilePath string
 		patternFilePath := args[0]
-		buildFilePath := args[1]
+
+		if len(args) == 2 {
+			buildFilePath = args[1]
+		}
 
 		frameWidth, _ := cmd.Flags().GetInt("width")
 		frameHeight, _ := cmd.Flags().GetInt("height")

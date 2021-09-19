@@ -56,10 +56,10 @@ Usage:
   golcli build [flags]
 
 Examples:
-golcli build -W 70 -c 400 ./pattern.txt ./build.json
+golcli build -W 70 -c 400 pattern.txt builds/pattern
 
 Flags:
-  -c, --count int       The number of frames displayed before exiting (-1 : infinite loop) (default 1000)
+  -c, --count int       The number of frames displayed before exiting (default 500)
   -H, --height int      The height of the frames (default 30)
   -h, --help            help for build
   -x, --pattern-x int   The x offset of the initial pattern (default 12)
@@ -75,7 +75,7 @@ Usage:
   golcli run [flags]
 
 Examples:
-golcli run -l "##" -i 200 ./buildFile.json
+golcli run -l "##" -d ".." -i 200 buildFiles/pattern
 
 Flags:
   -d, --dead-char string   The character(s) that represent a dead cell (default "██")

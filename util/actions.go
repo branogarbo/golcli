@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	gt "github.com/buger/goterm"
@@ -11,8 +12,20 @@ import (
 )
 
 // GenBuildFile creates a build file from bc.If the destination
-// file already exists, it will be overwritten.
+// file already exists, it will be overwritten. If the destination
+// is omitted, the build file will be saved in the CWD and will have the
+// pattern's filename without the extension.
 func GenBuildFile(bc BuildConfig) error {
+	if bc.BuildFilePath == "" {
+		var (
+			patFile        = filepath.Base(bc.InitPattern.FilePath)
+			fileExtLen     = len(filepath.Ext(patFile))
+			trimmedPatFile = patFile[:len(patFile)-fileExtLen]
+		)
+
+		bc.BuildFilePath = "./" + trimmedPatFile
+	}
+
 	var (
 		frames     = GenFramesFromPattern(bc)
 		framesJSON []byte
