@@ -11,8 +11,8 @@ import (
 	"github.com/klauspost/compress/s2"
 )
 
-// GenCellsFromPattern converts a pattern string to frame cells.
-func GenCellsFromPattern(bc BuildConfig) Cells {
+// genCellsFromPattern converts a pattern string to frame cells.
+func genCellsFromPattern(bc BuildConfig) Cells {
 	var (
 		frameCells      Cells
 		initLivingCells [][2]int
@@ -62,17 +62,17 @@ func GenCellsFromPattern(bc BuildConfig) Cells {
 	}
 
 	for i := range frameCells {
-		frameCells[i].LiveNeighborNum = GetLiveNeighborNumByCoord(bc, frameCells, frameCells[i].X, frameCells[i].Y)
+		frameCells[i].LiveNeighborNum = getLiveNeighborNumByCoord(bc, frameCells, frameCells[i].X, frameCells[i].Y)
 	}
 
 	return frameCells
 }
 
-// GetCellByCoord returns the cell that is at (x,y).
-func GetCellByCoord(bc BuildConfig, frameCells Cells, x, y int) Cell {
+// getCellByCoord returns the cell that is at (x,y).
+func getCellByCoord(bc BuildConfig, frameCells Cells, x, y int) Cell {
 	var targetCell Cell
 
-	if IsCoordOutOfFrame(bc, x, y) {
+	if isCoordOutOfFrame(bc, x, y) {
 		log.Fatal("GetCellByCoord: coord is out of frame")
 	}
 
@@ -86,9 +86,9 @@ func GetCellByCoord(bc BuildConfig, frameCells Cells, x, y int) Cell {
 	return targetCell
 }
 
-// GetLiveNeighborNumByCoord returns the number of cells neighboring the cell at (x,y).
-func GetLiveNeighborNumByCoord(bc BuildConfig, frameCells Cells, x, y int) int {
-	if IsCoordOutOfFrame(bc, x, y) {
+// getLiveNeighborNumByCoord returns the number of cells neighboring the cell at (x,y).
+func getLiveNeighborNumByCoord(bc BuildConfig, frameCells Cells, x, y int) int {
+	if isCoordOutOfFrame(bc, x, y) {
 		log.Fatal("GetLivingNeighborsByCoord: coord is out of frame")
 	}
 
@@ -101,8 +101,8 @@ func GetLiveNeighborNumByCoord(bc BuildConfig, frameCells Cells, x, y int) int {
 				targetY = y + relY
 			)
 
-			if !(relX == 0 && relY == 0) && !IsCoordOutOfFrame(bc, targetX, targetY) {
-				cell := GetCellByCoord(bc, frameCells, targetX, targetY)
+			if !(relX == 0 && relY == 0) && !isCoordOutOfFrame(bc, targetX, targetY) {
+				cell := getCellByCoord(bc, frameCells, targetX, targetY)
 
 				if cell.IsAlive {
 					liveNeighborNum++
@@ -114,18 +114,18 @@ func GetLiveNeighborNumByCoord(bc BuildConfig, frameCells Cells, x, y int) int {
 	return liveNeighborNum
 }
 
-// IsCoordOutOfFrame returns whether or not the cell at (x,y) is out of the frame.
-func IsCoordOutOfFrame(bc BuildConfig, x, y int) bool {
+// isCoordOutOfFrame returns whether or not the cell at (x,y) is out of the frame.
+func isCoordOutOfFrame(bc BuildConfig, x, y int) bool {
 	return x < 0 || y < 0 || x > bc.Width || y > bc.Height
 }
 
-// GetNewCell returns a new cell from the passed cell according to the life conditions.
-func GetNewCell(bc BuildConfig, frameCells Cells, cell Cell) Cell {
-	if IsCoordOutOfFrame(bc, cell.X, cell.Y) {
+// getNewCell returns a new cell from the passed cell according to the life conditions.
+func getNewCell(bc BuildConfig, frameCells Cells, cell Cell) Cell {
+	if isCoordOutOfFrame(bc, cell.X, cell.Y) {
 		log.Fatal("GetNewCell: coord is out of frame")
 	}
 
-	livingNeighbors := GetLiveNeighborNumByCoord(bc, frameCells, cell.X, cell.Y)
+	livingNeighbors := getLiveNeighborNumByCoord(bc, frameCells, cell.X, cell.Y)
 
 	// Any live cell with fewer than two live neighbours dies, as if by underpopulation.
 	// Any live cell with two or three live neighbours lives on to the next generation.
@@ -144,8 +144,8 @@ func GetNewCell(bc BuildConfig, frameCells Cells, cell Cell) Cell {
 	return cell
 }
 
-// GetConfigListStrings returns both game and pattern config strings from config.
-func GetConfigListStrings(config GameConfig) (string, string) {
+// getConfigListStrings returns both game and pattern config strings from config.
+func getConfigListStrings(config GameConfig) (string, string) {
 	var (
 		gameConfigList    string
 		patternConfigList string
@@ -186,17 +186,17 @@ func GetConfigListStrings(config GameConfig) (string, string) {
 	return gameConfigList, patternConfigList
 }
 
-// GenFramesFromPattern generates and returns Frames according to the values passed in bc.
-func GenFramesFromPattern(bc BuildConfig) Frames {
+// genFramesFromPattern generates and returns Frames according to the values passed in bc.
+func genFramesFromPattern(bc BuildConfig) Frames {
 	var (
-		frameCells  = GenCellsFromPattern(bc)
+		frameCells  = genCellsFromPattern(bc)
 		frames      = Frames{Frame{0, frameCells}}
 		pbTemplate  = `Loading frames: {{ etime . }} {{ bar . "[" "=" ">" " " "]" }} {{speed . }} {{percent . }}`
 		progressBar = pb.ProgressBarTemplate(pbTemplate).Start(bc.FrameCount).SetMaxWidth(100)
 	)
 
 	for i := 0; i < bc.FrameCount; i++ {
-		UpdateCells(bc, &frameCells)
+		updateCells(bc, &frameCells)
 		frames = append(frames, Frame{i + 1, frameCells})
 
 		progressBar.Increment()
@@ -208,8 +208,8 @@ func GenFramesFromPattern(bc BuildConfig) Frames {
 	return frames
 }
 
-// GenGameDataFromBuildFile returns GameData that was stored in the targeted json build file.
-func GenGameDataFromBuildFile(rc RunConfig) (GameData, error) {
+// genGameDataFromBuildFile returns GameData that was stored in the targeted json build file.
+func genGameDataFromBuildFile(rc RunConfig) (GameData, error) {
 	fmt.Println("Reading build file...")
 
 	var (
