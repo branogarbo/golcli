@@ -24,6 +24,7 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:     "golcli",
+	Version: "v1.8.0",
 	Short:   "A basic CLI implementation of Conway's Game of Life.",
 	Example: "golcli -c 100 -i 20 ./pattern.txt",
 	Args:    cobra.ExactArgs(1),
